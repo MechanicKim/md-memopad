@@ -6,6 +6,8 @@
 ![React](https://img.shields.io/badge/React-18+-61DAFB?style=flat-square&logo=react)
 ![TypeScript](https://img.shields.io/badge/TypeScript-5+-3178C6?style=flat-square&logo=typescript)
 
+**한국어** | [English](README.en.md)
+
 ## ✨ 특징
 
 - 🚀 **빠른 실행**: Tauri 기반의 가벼운 데스크톱 애플리케이션
