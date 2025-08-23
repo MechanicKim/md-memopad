@@ -12,7 +12,7 @@
   "app": {
     "windows": [
       {
-        "title": "md-memopad",
+        "title": "Simple Markdown Memopad",
         "width": 800,
         "height": 600
       }
