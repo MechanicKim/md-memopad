@@ -1,0 +1,116 @@
+import React, { useState } from 'react';
+import { marked } from 'marked';
+import { invoke } from '@tauri-apps/api/core';
+import './MarkdownEditor.css';
+
+const MarkdownEditor: React.FC = () => {
+  const [markdown, setMarkdown] = useState('# 새로운 메모\n\n여기에 마크다운으로 메모를 작성하세요...');
+  const [fileName, setFileName] = useState('새 메모');
+  const [isEditing, setIsEditing] = useState(true);
+
+  // 마크다운을 HTML로 변환
+  const getHtml = () => {
+    return { __html: marked(markdown) };
+  };
+
+  // 파일 열기 (Tauri command 사용)
+  const handleOpenFile = async () => {
+    console.log('파일 열기 시작...');
+    try {
+      const result = await invoke('open_file_dialog');
+      console.log('파일 선택 결과:', result);
+      
+      if (result && typeof result === 'object' && 'path' in result && 'content' in result) {
+        const { path, content } = result as { path: string; content: string };
+        setMarkdown(content);
+        
+        // 파일명 추출
+        const name = path.split('/').pop()?.replace(/\.[^/.]+$/, "") || '새 메모';
+        setFileName(name);
+        console.log('파일 열기 완료');
+      }
+    } catch (error) {
+      console.error('파일 열기 오류:', error);
+      alert(`파일을 열 수 없습니다: ${error}`);
+    }
+  };
+
+  // 파일 저장 (Tauri command 사용)
+  const handleSaveFile = async () => {
+    console.log('파일 저장 시작...');
+    try {
+      const result = await invoke('save_file_dialog', { 
+        content: markdown,
+        defaultName: `${fileName}.md`
+      });
+      
+      if (result && typeof result === 'string') {
+        // 파일명 업데이트
+        const name = result.split('/').pop()?.replace(/\.[^/.]+$/, "") || '새 메모';
+        setFileName(name);
+        
+        alert('파일이 저장되었습니다.');
+        console.log('파일 저장 완료');
+      }
+    } catch (error) {
+      console.error('파일 저장 오류:', error);
+      alert(`파일을 저장할 수 없습니다: ${error}`);
+    }
+  };
+
+  // 새 메모 시작
+  const handleNewMemo = () => {
+    setMarkdown('# 새로운 메모\n\n여기에 마크다운으로 메모를 작성하세요...');
+    setFileName('새 메모');
+    setIsEditing(true);
+  };
+
+  return (
+    <div className="markdown-editor">
+      <div className="toolbar">
+        <div className="toolbar-left">
+          <h1 className="title">{fileName}</h1>
+        </div>
+        <div className="toolbar-right">
+          <button onClick={handleNewMemo} className="btn btn-secondary">
+            새 메모
+          </button>
+          <button onClick={handleOpenFile} className="btn btn-secondary">
+            열기
+          </button>
+          <button onClick={handleSaveFile} className="btn btn-primary">
+            저장
+          </button>
+          <button 
+            onClick={() => setIsEditing(!isEditing)} 
+            className={`btn ${isEditing ? 'btn-secondary' : 'btn-primary'}`}
+          >
+            {isEditing ? '미리보기' : '편집'}
+          </button>
+        </div>
+      </div>
+
+      <div className="editor-container">
+        {isEditing ? (
+          <div className="editor-pane">
+            <textarea
+              value={markdown}
+              onChange={(e) => setMarkdown(e.target.value)}
+              placeholder="마크다운으로 메모를 작성하세요..."
+              className="markdown-textarea"
+            />
+          </div>
+        ) : (
+          <div className="preview-pane">
+            <div 
+              className="markdown-preview"
+              dangerouslySetInnerHTML={getHtml()}
+            />
+          </div>
+        )}
+      </div>
+    </div>
+  );
+};
+
+export default MarkdownEditor;
