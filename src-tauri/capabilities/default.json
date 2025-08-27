@@ -8,6 +8,13 @@
     "opener:default",
     "dialog:default",
     "fs:allow-write-text-file",
-    "fs:allow-read-text-file"
+    "fs:allow-read-text-file",
+    "fs:allow-exists",
+    "fs:allow-create",
+    {
+      "identifier": "fs:allow-app-read",
+      "allow": ["$DOCUMENT/**"]
+    },
+    "core:path:default"
   ]
 }
